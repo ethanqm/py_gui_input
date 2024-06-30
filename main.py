@@ -61,6 +61,7 @@ class MainWindow(QMainWindow):
                 QMessageBox.question(self,"Output", message, QMessageBox.Yes)
         except:
             #display error in message box
+            # actually not quite working rn
             QMessageBox.question(self,"Error", temp_err.getvalue(), QMessageBox.Yes)
             
 
@@ -72,3 +73,18 @@ if __name__ == '__main__':
     ex = MainWindow()
     ex.show()
     sys.exit(app.exec())
+
+''' ========== TRY =============
+
+with open("main.py","r") as f:
+  print(f.read())
+
+==============================
+
+self.setWindowTitle("oh no")
+
+==============================
+
+
+
+'''
