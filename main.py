@@ -1,6 +1,7 @@
 from contextlib import redirect_stdout
 import io
 import sys
+import traceback
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
@@ -32,21 +33,21 @@ class CodeInputWindow(QMainWindow):
         # code input textbox
         self.textbox =QPlainTextEdit(self)
         self.textbox.resize(280, 500)
-        self.textbox.setTabStopDistance(20) #tabs are historically too wide
+        self.textbox.setTabStopDistance(20) # tabs are historically too wide
         layout.addWidget(self.textbox)
         
         # scrolling output textbox
         outputScroll = QScrollArea(self)
         self.outputBox = QPlainTextEdit(self)
         self.outputBox.setReadOnly(True)
-        self.outputBox.resize(580, 300) #TODO: figure out automatic size fitting
-        self.outputBox.setTabStopDistance(20) #tabs are historically too wide
+        self.outputBox.resize(580, 300) # TODO: figure out automatic size fitting
+        self.outputBox.setTabStopDistance(20) # tabs are historically too wide
         outputScroll.setWidget(self.outputBox)
         layout.addWidget(outputScroll)
         
-        #run button for code
+        # run button for code
         run_button =QPushButton('Run', self)
-        #connect button to function
+        # connect button to function
         run_button.clicked.connect(self.on_click)
         layout.addWidget(run_button)
         
@@ -61,31 +62,49 @@ class CodeInputWindow(QMainWindow):
         # redirect terminal output
         temp_out = io.StringIO()
         sys.stdout = temp_out
-        temp_err = io.StringIO()
-        sys.stderr = temp_err
 
         try: 
             # actually execute the input code
             exec(code_input)
-            #get output from redirected terminal output
+            # get output from redirected terminal output
             message = temp_out.getvalue() 
             # remove excess newline from print statements
-            message = message[:-1] if message[-1] in ("\n", "\r") else message
-            # display output
-            self.outputBox.appendPlainText("> "+message)
-        except:
-            #display error in message box
-            # actually not quite working rn
-            QMessageBox.question(self,"Error", temp_err.getvalue(), QMessageBox.Yes)
+            if len(message) > 0:
+                message = message[:-1] if message[-1] in ("\n", "\r") else message
+            if len(message) > 0:
+                # display output
+                self.outputBox.appendPlainText("> "+message)
+        except Exception as e:
+            # display error 
+            # remove excess newline
+            message = str(e) # + traceback.format_exc()
+            if len(message) > 0:
+                message = message[:-1] if message[-1] in ("\n", "\r") else message
+            if len(message) > 0:
+                # display output
+                self.outputBox.appendPlainText("!> "+message)
+
             
 
-
-
+class TestObject():
+    data = 1
+    def __init__(self, x) -> None:
+        self.data = x
+    def testMethod(self):
+        print(f"test Method works: {self.data}")
+    def testSet(self,x):
+        self.data = x
+    def testGet(self):
+        return self.data
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     ex = CodeInputWindow()
     ex.show()
+    
+    testLambda = lambda : print("lambda worked :)")
+    testObject = TestObject(1)
+    
     sys.exit(app.exec())
 
 ''' ========== TRY =============
